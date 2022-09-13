@@ -11,6 +11,7 @@ use derive_more::Display;
 use pest::Parser;
 use std::collections::HashSet;
 use std::fmt;
+use std::ops::Deref;
 use std::str::FromStr;
 
 #[derive(Clone, Display, Debug)]
@@ -44,7 +45,7 @@ pub struct CVSSv3Parser;
 
 // Attack Vector
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum AV {
+pub enum AV {
     N,
     A,
     L,
@@ -64,7 +65,7 @@ impl AV {
 
 // Attack Complexity
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum AC {
+pub enum AC {
     L,
     H,
 }
@@ -81,7 +82,7 @@ impl AC {
 
 // Privileges Required
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum PR {
+pub enum PR {
     N,
     L,
     H,
@@ -110,7 +111,7 @@ impl PR {
 
 // User Interaction
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum UI {
+pub enum UI {
     N,
     R,
 }
@@ -127,7 +128,7 @@ impl UI {
 
 // Scope
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum S {
+pub enum S {
     U,
     C,
 }
@@ -144,7 +145,7 @@ impl S {
 
 // Confidentiality
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum C {
+pub enum C {
     H,
     L,
     N,
@@ -163,7 +164,7 @@ impl C {
 
 // Integrity
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum I {
+pub enum I {
     H,
     L,
     N,
@@ -181,7 +182,7 @@ impl I {
 
 // Availability
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum A {
+pub enum A {
     H,
     L,
     N,
@@ -199,7 +200,7 @@ impl A {
 
 // Exploit code maturity
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum E {
+pub enum E {
     X,
     H,
     F,
@@ -221,7 +222,7 @@ impl E {
 
 // Remediation Level
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum RL {
+pub enum RL {
     X,
     U,
     W,
@@ -244,7 +245,7 @@ impl RL {
 
 // Report Confidence
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum RC {
+pub enum RC {
     X,
     C,
     R,
@@ -265,7 +266,7 @@ impl RC {
 
 // Confidentiality Requirement
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum CR {
+pub enum CR {
     X,
     H,
     M,
@@ -286,7 +287,7 @@ impl CR {
 
 // Integrity Requirement
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum IR {
+pub enum IR {
     X,
     H,
     M,
@@ -306,7 +307,7 @@ impl IR {
 
 // Availability Requirement
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum AR {
+pub enum AR {
     X,
     H,
     M,
@@ -326,7 +327,7 @@ impl AR {
 
 // Modified Attack Vector
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum MAV {
+pub enum MAV {
     N,
     A,
     L,
@@ -346,7 +347,7 @@ impl MAV {
 
 // Modified Attack Complexity
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum MAC {
+pub enum MAC {
     X,
     L,
     H,
@@ -365,7 +366,7 @@ impl MAC {
 
 // Modified Privileges Required
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum MPR {
+pub enum MPR {
     X,
     N,
     L,
@@ -398,7 +399,7 @@ impl MPR {
 
 // Modified User Interaction
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum MUI {
+pub enum MUI {
     X,
     N,
     R,
@@ -417,7 +418,7 @@ impl MUI {
 
 // Modified Scope
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum MS {
+pub enum MS {
     X,
     U,
     C,
@@ -435,7 +436,7 @@ impl MS {
 
 // Modified Confidentiality
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum MC {
+pub enum MC {
     X,
     N,
     L,
@@ -455,7 +456,7 @@ impl MC {
 
 // Modified Integrity
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum MI {
+pub enum MI {
     X,
     N,
     L,
@@ -475,7 +476,7 @@ impl MI {
 
 // Modified Availability
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum MA {
+pub enum MA {
     X,
     N,
     L,
@@ -495,7 +496,7 @@ impl MA {
 
 #[derive(Clone, Derivative, Display, Debug, Eq, Ord, PartialOrd)]
 #[derivative(Hash, PartialEq)]
-enum CVSSv3Metric {
+pub enum CVSSv3Metric {
     #[display(fmt = "AV:{}", _0)]
     AttackVector(
         #[derivative(Hash = "ignore")]
@@ -698,10 +699,26 @@ impl fmt::Display for Vector {
 }
 
 #[derive(Debug)]
-pub struct CVSSv3(Version, Vector);
+pub struct CVSSv3(pub Version, pub Vector);
 impl fmt::Display for CVSSv3 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}/{}", self.0, self.1)
+    }
+}
+
+impl IntoIterator for CVSSv3 {
+    type Item = CVSSv3Metric;
+    type IntoIter = <Vec<CVSSv3Metric> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.1.0.into_iter()
+    }
+}
+
+impl Deref for CVSSv3 {
+    type Target = [CVSSv3Metric];
+    fn deref(&self) -> &[CVSSv3Metric] {
+        &self.1.0[..]
     }
 }
 
@@ -972,7 +989,7 @@ impl FromStr for CVSSv3 {
 impl CVSSv3 {
     pub fn base_score(&self) -> Result<f64> {
         use CVSSv3Metric::*;
-        if let [av, ac, pr, ui, s, c, i, a, ..] = &self.1 .0[..] {
+        if let [av, ac, pr, ui, s, c, i, a, ..] = &self[..] {
             let iss: f64 = 1.0 - ((1.0 - c.value()) * (1.0 - i.value()) * (1.0 - a.value()));
             let impact = match s {
                 Scope(scope @ S::C) => {
@@ -1008,7 +1025,7 @@ impl CVSSv3 {
 
     pub fn temporal_score(&self) -> Result<f64> {
         let base_score = self.base_score()?;
-        if let [e, rl, rc, ..] = &self.1 .0[8..] {
+        if let [e, rl, rc, ..] = &self[8..] {
             Ok(roundup(base_score * &e.value() * &rl.value() * &rc.value()))
         } else {
             Err(anyhow!("unable to calculate temporal score"))
@@ -1018,7 +1035,7 @@ impl CVSSv3 {
     pub fn environmental_score(&self) -> Result<f64> {
         use CVSSv3Metric::*;
 
-        if let [e, rl, rc, cr, ir, ar, mav, mac, mpr, mui, ms, mc, mi, ma] = &self.1 .0[8..] {
+        if let [e, rl, rc, cr, ir, ar, mav, mac, mpr, mui, ms, mc, mi, ma] = &self[8..] {
             let miss: f64 = f64::min(
                 1.0 - ((1.0 - cr.value() * mc.value())
                     * (1.0 - ir.value() * mi.value())
