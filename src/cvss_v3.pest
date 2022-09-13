@@ -1,0 +1,94 @@
+cvss_v3 = {"3.0"}
+cvss_v31 = {"3.1"}
+cvss_version = { cvss_v3 | cvss_v31 }
+cvss_vector = { "CVSS:" ~ cvss_version ~ "/" ~ (cvss_mandatory)+ ~ ("/" ~ cvss_optional)* }
+cvss_mandatory = _{ base ~ ("/" ~ base)*  }
+cvss_optional = _{ temporal | environmental }
+
+network = { "N" }
+adjacent = { "A" }
+local = { "L" }
+physical = { "P" }
+none = { "N" }
+low = { "L" }
+medium = { "M" }
+high = { "H" }
+required = { "R" }
+not_defined = { "X" }
+unchanged = { "U" }
+changed = { "C" }
+functional = { "F" }
+proof_of_concept = { "P" }
+unproven = { "U" }
+unavailable = { "U" }
+workaround = { "W" }
+temporary_fix = { "T" }
+official_fix = { "O" }
+confirmed = { "C" }
+reasonable = { "R" }
+unknown = { "U" }
+
+base = _{
+  attack_vector |
+  attack_complexity |
+  privileges_required |
+  user_interaction |
+  scope |
+  confidentiality |
+  integrity |
+  availability
+}
+
+attack_vector = { "AV:" ~ (network | adjacent | local | physical) }
+attack_complexity = { "AC:" ~ (low | high) }
+privileges_required = { "PR:" ~ (none | low | high)  }
+user_interaction = {"UI:" ~ (none | required) }
+scope = { "S:" ~ (unchanged | changed) }
+confidentiality = { "C:" ~ (high | low | none) }
+integrity = { "I:" ~ (high | low | none ) }
+availability = { "A:" ~ (high | low | none ) }
+
+
+temporal = _{
+  exploit_maturity |
+  remediation_level |
+  report_confidence
+}
+
+exploit_maturity = {
+  "E:" ~ (
+    not_defined |
+    high |
+    functional |
+    proof_of_concept |
+    unproven)
+}
+
+remediation_level = { "RL:" ~ (not_defined | unavailable | workaround | temporary_fix | official_fix) }
+report_confidence = { "RC:" ~ (not_defined | confirmed | reasonable | unknown) }
+
+environmental = _{
+  confidentiality_requirement |
+  integrity_requirement |
+  availability_requirement |
+  modified_attack_vector |
+  modified_attack_complexity |
+  modified_privileges_required |
+  modified_user_interaction |
+  modified_scope |
+  modified_confidentiality |
+  modified_integrity |
+  modified_availability
+}
+
+confidentiality_requirement = { "CR:" ~ (not_defined | low | medium | high ) }
+integrity_requirement = { "IR:" ~ (not_defined | low | medium | high ) }
+availability_requirement = { "AR:" ~ (not_defined | low | medium | high ) }
+modified_attack_vector = { "MAV:" ~ (network | adjacent | local | physical) }
+modified_attack_complexity = { "MAC:" ~ (low | high | not_defined ) }
+modified_privileges_required = { "MPR:" ~ (none | low | high | not_defined)  }
+modified_user_interaction = {"MUI:" ~ (none | required | not_defined) }
+modified_scope = { "MS:" ~ (unchanged | changed | not_defined) }
+modified_confidentiality = { "MC:" ~ (high | low | none | not_defined ) }
+modified_integrity = { "MI:" ~ (high | low | none | not_defined ) }
+modified_availability = { "MA:" ~ (high | low | none | not_defined ) }

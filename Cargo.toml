@@ -1,0 +1,16 @@
+[package]
+name = "cvss"
+version = "0.1.0"
+edition = "2021"
+authors = ["Grant Murphy <gcmurphy@pm.me>"]
+description = "Rust library for working CVSS v3"
+license = "Apache-2.0"
+readme = "README.md"
+keywords = ["vulnerabilities", "cvss"]
+
+[dependencies]
+anyhow = "1.0.64"
+derivative = "2.2.0"
+derive_more = "0.99.17"
+pest = "2.3.0"
+pest_derive = "2.3.0"
