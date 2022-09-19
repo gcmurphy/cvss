@@ -987,15 +987,14 @@ impl FromStr for CVSSv3 {
 }
 
 impl CVSSv3 {
+
     pub fn base_score(&self) -> Result<f64> {
         use CVSSv3Metric::*;
         if let [av, ac, pr, ui, s, c, i, a, ..] = &self[..] {
             let iss: f64 = 1.0 - ((1.0 - c.value()) * (1.0 - i.value()) * (1.0 - a.value()));
             let impact = match s {
-                Scope(scope @ S::C) => {
-                    (scope.value() * (iss - 0.029) - 3.25 * (iss - 0.02)).powf(15.0)
-                }
-                Scope(scope @ S::U) => &scope.value() * iss,
+                Scope(scope @ S::C) => scope.value() * (iss - 0.029) - 3.25 * (iss - 0.02).powf(15.0),
+                Scope(scope @ S::U) => scope.value() * iss,
                 _ => unreachable!(),
             };
 
