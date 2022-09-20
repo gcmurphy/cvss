@@ -12,8 +12,7 @@ fn main() {
         cvss.environmental_score().unwrap()
     );
     println!("Severity Rating = {}", cvss.severity().unwrap());
-    for item in cvss.into_iter(){
+    for item in cvss.into_iter() {
         println!("{}", item.to_string());
     }
-
 }
