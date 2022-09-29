@@ -17,10 +17,10 @@ impl TryFrom<f64> for SeverityRating {
         use SeverityRating::*;
         match score {
             x if x == 0.0 => Ok(None),
-            x if x >= 0.1 && x <= 3.9 => Ok(Low),
-            x if x >= 4.0 && x <= 6.9 => Ok(Medium),
-            x if x >= 7.0 && x <= 8.9 => Ok(High),
-            x if x >= 9.0 && x <= 10.0 => Ok(Critical),
+            x if (0.1..=3.9).contains(&x) => Ok(Low),
+            x if (4.0..=6.9).contains(&x) => Ok(Medium),
+            x if (7.0..=8.9).contains(&x) => Ok(High),
+            x if (9.0..=10.0).contains(&x) => Ok(Critical),
             _ => Err(CVSSError::InvalidScore),
         }
     }

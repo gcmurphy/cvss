@@ -30,7 +30,7 @@ pub struct Vector(Vec<CVSSv3Metric>);
 impl fmt::Display for Vector {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let vals = &self.0;
-        let strs: Vec<String> = vals.into_iter().map(|x| x.to_string()).collect();
+        let strs: Vec<String> = vals.iter().map(|x| x.to_string()).collect();
         write!(f, "{}", strs.join("/"))
     }
 }
@@ -86,7 +86,7 @@ impl CVSSv3 {
                     * av.value()
                     * ac.value()
                     * ui.value()
-                    * privileges_required.scoped_value(&scope);
+                    * privileges_required.scoped_value(scope);
 
                 if impact <= 0.0 {
                     Ok(0.0)
@@ -108,7 +108,7 @@ impl CVSSv3 {
     pub fn temporal_score(&self) -> Result<f64, errors::CVSSError> {
         let base_score = self.base_score()?;
         if let [e, rl, rc, ..] = &self[8..] {
-            Ok(roundup(base_score * &e.value() * &rl.value() * &rc.value()))
+            Ok(roundup(base_score * e.value() * rl.value() * rc.value()))
         } else {
             Err(errors::CVSSError::IncompleteTemporalScore)
         }
@@ -138,12 +138,12 @@ impl CVSSv3 {
                 let modified_exploitability = 8.22
                     * mav.value()
                     * mac.value()
-                    * privileges_required.scoped_value(&scope)
+                    * privileges_required.scoped_value(scope)
                     * mui.value();
                 if modified_impact <= 0.0 {
                     Ok(0.0)
                 } else {
-                    let temporal_product = &e.value() * &rl.value() * &rc.value();
+                    let temporal_product = e.value() * rl.value() * rc.value();
                     let result = match ms {
                         ModifiedScope(MS::U) | ModifiedScope(MS::X) => roundup(
                             roundup((modified_impact + modified_exploitability).min(10.0))

@@ -35,7 +35,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::attack_complexity => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -44,7 +44,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
 
             Rule::privileges_required => {
@@ -55,7 +55,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::user_interaction => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -64,7 +64,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::scope => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -73,7 +73,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::confidentiality => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -83,7 +83,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::integrity => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -93,7 +93,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::availability => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -103,7 +103,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::exploit_maturity => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -115,7 +115,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::remediation_level => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -127,7 +127,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::report_confidence => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -138,7 +138,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
 
             Rule::confidentiality_requirement => {
@@ -150,7 +150,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::integrity_requirement => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -161,7 +161,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::availability_requirement => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -172,7 +172,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::modified_attack_vector => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -183,7 +183,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::modified_attack_complexity => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -193,7 +193,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::modified_privileges_required => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -204,7 +204,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::modified_user_interaction => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -214,7 +214,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::modified_scope => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -224,7 +224,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::modified_confidentiality => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -235,7 +235,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::modified_integrity => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -246,7 +246,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::modified_availability => {
                 match entry.into_inner().next().unwrap().as_rule() {
@@ -257,7 +257,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                     _ => unreachable!(),
                 }
                 .then_some(())
-                .ok_or_else(|| CVSSError::DuplicateMetrics)?;
+                .ok_or(CVSSError::DuplicateMetrics)?;
             }
 
             _ => unreachable!(),
