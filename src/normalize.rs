@@ -1,4 +1,4 @@
-pub fn roundup(input: f64) -> f64 {
+pub(crate) fn roundup(input: f64) -> f64 {
     let score = (input * 100_000.0) as u64;
     if score % 10000 == 0 {
         (score as f64) / 100_000.0

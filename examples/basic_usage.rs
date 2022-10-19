@@ -1,4 +1,4 @@
-use cvss::CVSSv3;
+use cvss::v3::CVSSv3;
 use std::str::FromStr;
 
 fn main() {
