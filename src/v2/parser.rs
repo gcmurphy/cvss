@@ -1,9 +1,7 @@
 use crate::errors::CVSSError;
+use crate::v2::metrics::CVSSv2Metric;
 
 use pest::Parser;
-
-type Version = String;
-type CVSSv2Metric = String;
 
 #[derive(Parser)]
 #[grammar = "v2/cvss_v2.pest"]
