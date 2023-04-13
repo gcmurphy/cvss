@@ -53,7 +53,7 @@ confirmed = {"C"}
 
 access_vector = { "AV:" ~ (network | adjacent | local) }
 access_complexity = { "AC:" ~ (high | medium | low) }
-authentication = { "AU:" ~ (multiple | single | none )  }
+authentication = { ^"AU:" ~ (multiple | single | none )  }
 confidentiality = { "C:" ~ (none | partial | complete ) }
 integrity = { "I:" ~ (none | partial | complete) }
 availability = {"A:" ~ (none | partial | complete) }

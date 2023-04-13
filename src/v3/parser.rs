@@ -283,8 +283,6 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
         .ok_or(CVSSError::ParsingError)?
 }
 
-
-
 #[cfg(test)]
 mod tests {
 
@@ -296,7 +294,7 @@ mod tests {
         let result = parse(input);
         assert!(result.is_ok());
         if let Ok((version, _vector)) = result {
-            assert!(match version{ 
+            assert!(match version {
                 Version::V31 => true,
                 _ => false,
             });
@@ -304,12 +302,12 @@ mod tests {
     }
 
     #[test]
-    fn test_can_parse_full_metrics(){
+    fn test_can_parse_full_metrics() {
         let input = "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N/E:F/RL:U/RC:C/CR:H/IR:H/AR:M/MAV:N/MAC:L/MPR:N/MUI:N/MS:U/MC:H/MI:H/MA:H";
         let result = parse(input);
         assert!(result.is_ok());
         if let Ok((version, _vector)) = result {
-            assert!(match version{ 
+            assert!(match version {
                 Version::V31 => true,
                 _ => false,
             });
@@ -317,42 +315,36 @@ mod tests {
     }
 
     #[test]
-    fn test_wont_accept_invalid_input(){
-
+    fn test_wont_accept_invalid_input() {
         let input = "CVSS:3.1/AV:NA:/R:/INS:/:/:H/A:E:F/RL:U/RC:C/MUI:N/MS:U/MC:H/MI:H/MA:H";
         let result = parse(input);
         assert!(result.is_err());
         assert!(match result {
-            Err(CVSSError::ParsingError) => true, 
+            Err(CVSSError::ParsingError) => true,
             _ => false,
         });
-
-
     }
 
     #[test]
-    fn test_can_detect_duplicate_metrics(){
+    fn test_can_detect_duplicate_metrics() {
         let input = "CVSS:3.1/AV:N/AC:H/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N";
         let result = parse(input);
         assert!(result.is_err());
         assert!(match result {
-            Err(CVSSError::DuplicateMetrics) => true, 
+            Err(CVSSError::DuplicateMetrics) => true,
             _ => false,
         });
     }
 
     #[test]
-    fn test_can_detect_missing_mandatory_fields(){
+    fn test_can_detect_missing_mandatory_fields() {
         let input = "CVSS:3.1/AV:N/AC:H/S:U/C:H/I:H/A:N";
         let result = parse(input);
         println!("{:?}", result);
         assert!(result.is_err());
         assert!(match result {
-            Err(CVSSError::ParsingError) => true, 
+            Err(CVSSError::ParsingError) => true,
             _ => false,
         });
     }
 }
-
-
-
