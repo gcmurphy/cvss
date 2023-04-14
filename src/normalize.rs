@@ -6,3 +6,7 @@ pub(crate) fn roundup(input: f64) -> f64 {
         (((score as f64) / 10_000.0).floor() + 1.0) / 10.0
     }
 }
+
+pub(crate) fn round_to_1_decimal(input: f64) -> f64 {
+    (input * 10.0).round() / 10.0
+}

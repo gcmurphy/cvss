@@ -8,6 +8,16 @@ pub enum AV {
     A, // adjacent
     L, // local
 }
+impl AV {
+    pub const fn value(&self) -> f64 {
+        use AV::*;
+        match self {
+            N => 1.0,
+            A => 0.646,
+            L => 0.395,
+        }
+    }
+}
 
 // Access Complexity
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -15,6 +25,17 @@ pub enum AC {
     H, // high
     M, // medium
     L, // low
+}
+
+impl AC {
+    pub const fn value(&self) -> f64 {
+        use AC::*;
+        match self {
+            H => 0.35,
+            M => 0.61,
+            L => 0.71,
+        }
+    }
 }
 
 // Authentication
@@ -25,12 +46,33 @@ pub enum AU {
     N, // none
 }
 
+impl AU {
+    pub const fn value(&self) -> f64 {
+        use AU::*;
+        match self {
+            M => 0.45,
+            S => 0.56,
+            N => 0.704,
+        }
+    }
+}
+
 // Confidentiality
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum C {
     N, // none
     P, // partial
     C, // complete
+}
+impl C {
+    pub const fn value(&self) -> f64 {
+        use self::C::{C, N, P};
+        match self {
+            N => 0.0,
+            P => 0.275,
+            C => 0.660,
+        }
+    }
 }
 
 // Integrity
@@ -40,6 +82,16 @@ pub enum I {
     P, // partial
     C, // complete
 }
+impl I {
+    pub const fn value(&self) -> f64 {
+        use I::{C, N, P};
+        match self {
+            N => 0.0,
+            P => 0.275,
+            C => 0.660,
+        }
+    }
+}
 
 // Availability
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -47,6 +99,16 @@ pub enum A {
     N, // none
     P, // partial
     C, // complete
+}
+impl A {
+    pub const fn value(&self) -> f64 {
+        use A::{C, N, P};
+        match self {
+            N => 0.0,
+            P => 0.275,
+            C => 0.660,
+        }
+    }
 }
 
 // Exploitability
@@ -59,6 +121,19 @@ pub enum E {
     ND,  // not defined
 }
 
+impl E {
+    pub const fn value(&self) -> f64 {
+        use E::*;
+        match self {
+            U => 0.85,
+            POC => 0.9,
+            F => 0.95,
+            H => 1.0,
+            ND => 1.0,
+        }
+    }
+}
+
 // Remediation level
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum RL {
@@ -69,6 +144,19 @@ pub enum RL {
     ND, // not defined
 }
 
+impl RL {
+    pub const fn value(&self) -> f64 {
+        use RL::*;
+        match self {
+            OF => 0.87,
+            TF => 0.9,
+            W => 0.95,
+            U => 1.0,
+            ND => 1.0,
+        }
+    }
+}
+
 // Report confidence
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum RC {
@@ -76,6 +164,17 @@ pub enum RC {
     UR, // uncorroborated
     C,  // confirmed
     ND, // not defined
+}
+impl RC {
+    pub const fn value(&self) -> f64 {
+        use RC::*;
+        match self {
+            UC => 0.9,
+            UR => 0.95,
+            C => 1.0,
+            ND => 1.0,
+        }
+    }
 }
 
 // Collateral damage potential
@@ -89,6 +188,20 @@ pub enum CDP {
     ND, // not defined
 }
 
+impl CDP {
+    pub const fn value(&self) -> f64 {
+        use CDP::*;
+        match self {
+            N => 0.0,
+            L => 0.1,
+            LM => 0.3,
+            MH => 0.4,
+            H => 0.5,
+            ND => 0.0,
+        }
+    }
+}
+
 // Target distribution
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum TD {
@@ -99,6 +212,19 @@ pub enum TD {
     ND, // not defined
 }
 
+impl TD {
+    pub const fn value(&self) -> f64 {
+        use TD::*;
+        match self {
+            N => 0.0,
+            L => 0.25,
+            M => 0.75,
+            H => 1.0,
+            ND => 1.0,
+        }
+    }
+}
+
 // Confidentiality Requirement
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum CR {
@@ -107,6 +233,18 @@ pub enum CR {
     M,  // medium
     H,  // high
     ND, // not defined
+}
+impl CR {
+    pub const fn value(&self) -> f64 {
+        use CR::*;
+        match self {
+            N => 0.0,
+            L => 0.5,
+            M => 1.0,
+            H => 1.51,
+            ND => 1.0,
+        }
+    }
 }
 
 // Integrity Requirement
@@ -119,6 +257,19 @@ pub enum IR {
     ND, // not defined
 }
 
+impl IR {
+    pub const fn value(&self) -> f64 {
+        use IR::*;
+        match self {
+            N => 0.0,
+            L => 0.5,
+            M => 1.0,
+            H => 1.51,
+            ND => 1.0,
+        }
+    }
+}
+
 // Availability Requirement
 #[derive(Clone, Display, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum AR {
@@ -127,6 +278,19 @@ pub enum AR {
     M,  // medium
     H,  // high
     ND, // not defined
+}
+
+impl AR {
+    pub const fn value(&self) -> f64 {
+        use AR::*;
+        match self {
+            N => 0.0,
+            L => 0.5,
+            M => 1.0,
+            H => 1.51,
+            ND => 1.0,
+        }
+    }
 }
 
 #[derive(Clone, Derivative, Display, Debug, Eq, Ord, PartialOrd)]
@@ -227,4 +391,26 @@ pub enum CVSSv2Metric {
         #[derivative(PartialEq = "ignore")]
         AR,
     ),
+}
+
+impl CVSSv2Metric {
+    pub const fn value(&self) -> f64 {
+        use CVSSv2Metric::*;
+        match self {
+            AccessVector(x) => x.value(),
+            AccessComplexity(x) => x.value(),
+            Authentication(x) => x.value(),
+            Confidentiality(x) => x.value(),
+            Integrity(x) => x.value(),
+            Availability(x) => x.value(),
+            Exploitability(x) => x.value(),
+            RemediationLevel(x) => x.value(),
+            ReportConfidence(x) => x.value(),
+            CollateralDamagePotential(x) => x.value(),
+            TargetDistribution(x) => x.value(),
+            ConfidentialityRequirement(x) => x.value(),
+            IntegrityRequirement(x) => x.value(),
+            AvailabilityRequirement(x) => x.value(),
+        }
+    }
 }

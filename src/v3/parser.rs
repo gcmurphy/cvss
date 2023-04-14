@@ -340,7 +340,6 @@ mod tests {
     fn test_can_detect_missing_mandatory_fields() {
         let input = "CVSS:3.1/AV:N/AC:H/S:U/C:H/I:H/A:N";
         let result = parse(input);
-        println!("{:?}", result);
         assert!(result.is_err());
         assert!(match result {
             Err(CVSSError::ParsingError) => true,
