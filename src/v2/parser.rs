@@ -193,31 +193,20 @@ mod tests {
     fn test_wont_accept_invalid_input() {
         let input = "AV:AA/E:POR:WR:RCP:HT:M/CR:/IR:M/AR:M";
         let result = parse(input);
-        assert!(match result {
-            Err(CVSSError::ParsingError) => true,
-            _ => {
-                false
-            }
-        });
+        matches!(result, Err(CVSSError::ParsingError));
     }
 
     #[test]
     fn test_wont_allow_repeat_metrics() {
         let input = "AV:L/AC:H/Au:N/Au:N/C:C/I:C/A:C";
         let result = parse(input);
-        assert!(match result {
-            Err(CVSSError::DuplicateMetrics) => true,
-            _ => false,
-        });
+        matches!(result, Err(CVSSError::DuplicateMetrics));
     }
 
     #[test]
     fn test_can_detect_missing_mandatory_fields() {
         let result = parse("AV:L/AC:H/C:C/I:C/A:C");
         assert!(result.is_err());
-        assert!(match result {
-            Err(CVSSError::ParsingError) => true,
-            _ => false,
-        });
+        matches!(result, Err(CVSSError::ParsingError));
     }
 }

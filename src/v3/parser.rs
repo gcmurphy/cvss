@@ -294,10 +294,7 @@ mod tests {
         let result = parse(input);
         assert!(result.is_ok());
         if let Ok((version, _vector)) = result {
-            assert!(match version {
-                Version::V31 => true,
-                _ => false,
-            });
+            matches!(version, Version::V31);
         }
     }
 
@@ -307,10 +304,7 @@ mod tests {
         let result = parse(input);
         assert!(result.is_ok());
         if let Ok((version, _vector)) = result {
-            assert!(match version {
-                Version::V31 => true,
-                _ => false,
-            });
+            matches!(version, Version::V31);
         }
     }
 
@@ -319,10 +313,7 @@ mod tests {
         let input = "CVSS:3.1/AV:NA:/R:/INS:/:/:H/A:E:F/RL:U/RC:C/MUI:N/MS:U/MC:H/MI:H/MA:H";
         let result = parse(input);
         assert!(result.is_err());
-        assert!(match result {
-            Err(CVSSError::ParsingError) => true,
-            _ => false,
-        });
+        matches!(result, Err(CVSSError::ParsingError));
     }
 
     #[test]
@@ -330,10 +321,7 @@ mod tests {
         let input = "CVSS:3.1/AV:N/AC:H/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N";
         let result = parse(input);
         assert!(result.is_err());
-        assert!(match result {
-            Err(CVSSError::DuplicateMetrics) => true,
-            _ => false,
-        });
+        matches!(result, Err(CVSSError::DuplicateMetrics));
     }
 
     #[test]
@@ -341,9 +329,6 @@ mod tests {
         let input = "CVSS:3.1/AV:N/AC:H/S:U/C:H/I:H/A:N";
         let result = parse(input);
         assert!(result.is_err());
-        assert!(match result {
-            Err(CVSSError::ParsingError) => true,
-            _ => false,
-        });
+        matches!(result, Err(CVSSError::IncompleteBaseScore));
     }
 }
