@@ -279,7 +279,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
     let mut vector = Vec::from_iter(vector);
     vector.sort();
     (unmet_mandatory_requirements == 0)
-        .then(|| Ok((version, vector)))
+        .then_some(Ok((version, vector)))
         .ok_or(CVSSError::ParsingError)?
 }
 
