@@ -39,10 +39,6 @@ impl FromStr for CVSSv2 {
 }
 
 impl CVSSv2 {
-    // BaseScore = round_to_1_decimal(((0.6*Impact)+(0.4*Exploitability)-1.5)*f(Impact))
-    // Impact = 10.41*(1-(1-ConfImpact)*(1-IntegImpact)*(1-AvailImpact))
-    // Exploitability = 20* AccessVector*AccessComplexity*Authentication
-
     fn impact(&self) -> Result<f64, CVSSError> {
         if let [_, _, _, c, i, a, ..] = &self[..] {
             Ok(10.41 * (1.0 - (1.0 - c.value()) * (1.0 - i.value()) * (1.0 - a.value())))
@@ -116,11 +112,6 @@ impl CVSSv2 {
     }
 
     pub fn environmental_score(&self) -> Result<(f64, f64), CVSSError> {
-        /*
-        EnvironmentalScore = round_to_1_decimal((AdjustedTemporal+ (10-AdjustedTemporal)*CollateralDamagePotential)*TargetDistribution)
-        AdjustedTemporal = TemporalScore recomputed with the BaseScore's Impact sub-equation replaced with the AdjustedImpact equation
-        AdjustedImpact = min(10,10.41*(1-(1-ConfImpact*ConfReq)*(1-IntegImpact*IntegReq)*(1-AvailImpact*AvailReq)))
-         */
         if let [cdp, td, ..] = &self[9..] {
             let adjusted_impact = self.adjusted_impact()?;
             let adjusted_temporal = self.calculate_temporal_score(Some(self.adjusted_impact()?))?;
