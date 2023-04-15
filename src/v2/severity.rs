@@ -1,17 +1,15 @@
 use crate::errors::CVSSError;
 use derive_more::Display;
 
-// These are the NVD vulnerability severity rating for CVSS v3
+// These are the NVD vulnerability severity ratings for CVSS v2
 //
 // https://nvd.nist.gov/vuln-metrics/cvss
 //
-#[derive(Clone, Display, Debug)]
+#[derive(Clone, Display, Debug, PartialEq)]
 pub enum SeverityRating {
-    None,
     Low,
     Medium,
     High,
-    Critical,
 }
 
 impl TryFrom<f64> for SeverityRating {
@@ -20,11 +18,9 @@ impl TryFrom<f64> for SeverityRating {
     fn try_from(score: f64) -> Result<Self, Self::Error> {
         use SeverityRating::*;
         match score {
-            x if x == 0.0 => Ok(None),
-            x if (0.1..=3.9).contains(&x) => Ok(Low),
+            x if (0.0..=3.9).contains(&x) => Ok(Low),
             x if (4.0..=6.9).contains(&x) => Ok(Medium),
-            x if (7.0..=8.9).contains(&x) => Ok(High),
-            x if (9.0..=10.0).contains(&x) => Ok(Critical),
+            x if (7.0..=10.0).contains(&x) => Ok(High),
             _ => Err(CVSSError::InvalidScore),
         }
     }
