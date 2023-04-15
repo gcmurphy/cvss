@@ -1,6 +1,10 @@
 use crate::errors::CVSSError;
 use derive_more::Display;
 
+// These are the NVD vulnerability severity rating for CVSS v3
+//
+// https://nvd.nist.gov/vuln-metrics/cvss
+//
 #[derive(Clone, Display, Debug)]
 pub enum SeverityRating {
     None,
