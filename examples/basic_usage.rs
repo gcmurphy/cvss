@@ -1,4 +1,4 @@
-use cvss::CVSSv3;
+use cvss::v3::CVSSv3;
 use std::str::FromStr;
 
 fn main() {
@@ -13,6 +13,6 @@ fn main() {
     );
     println!("Severity Rating = {}", cvss.severity().unwrap());
     for item in cvss.into_iter() {
-        println!("{}", item.to_string());
+        println!("{}", item);
     }
 }

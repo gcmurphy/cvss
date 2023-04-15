@@ -1,0 +1,73 @@
+cvss_vector = { (cvss_mandatory)+ ~ ("/" ~ cvss_optional)* }
+cvss_mandatory = _{ base ~ ("/" ~ base)*  }
+cvss_optional = _{ temporal | environmental }
+
+base = _{
+  access_vector |
+  access_complexity |
+  authentication |
+  confidentiality |
+  integrity |
+  availability
+}
+
+temporal = _{
+  exploitability |
+  remediation_level | 
+  report_confidence
+}
+
+environmental = _{
+  collateral_damage_potential |
+  target_distribution |
+  confidentiality_requirement |
+  integrity_requirement |
+  availability_requirement
+}
+
+network = {"N"}
+adjacent = {"A"}
+local = {"L"}
+low = {"L"}
+low_medium = {"LM"}
+medium = {"M"}
+medium_high = {"MH"}
+high = {"H"}
+
+single = {"S"}
+multiple = {"M"}
+none = {"N"}
+partial = {"P"}
+complete = {"C"}
+unproven = {"U"}
+proof_of_concept = {"POC"}
+functional = {"F"}
+not_defined = {"ND"}
+official_fix = {"OF"}
+temporary_fix = {"TF"}
+workaround = {"W"}
+unavailable = {"U"}
+unconfirmed = {"UC"}
+uncorroborated = {"UR"}
+confirmed = {"C"}
+
+access_vector = { "AV:" ~ (network | adjacent | local) }
+access_complexity = { "AC:" ~ (high | medium | low) }
+authentication = { ^"AU:" ~ (multiple | single | none )  }
+confidentiality = { "C:" ~ (none | partial | complete ) }
+integrity = { "I:" ~ (none | partial | complete) }
+availability = {"A:" ~ (none | partial | complete) }
+
+exploitability = { "E:" ~ (unproven | proof_of_concept | functional | high | not_defined ) }
+remediation_level = { "RL:" ~ (official_fix | temporary_fix | workaround | unavailable | not_defined) }
+report_confidence = { "RC:" ~ (unconfirmed | uncorroborated | confirmed | not_defined ) }
+
+collateral_damage_potential = { 
+  "CDP:" ~ (none | low | low_medium | medium_high | high | not_defined )
+}
+
+target_distribution = { "TD:" ~ (none | low | medium | high | not_defined )}
+confidentiality_requirement = { "CR:" ~ (low | medium | high | not_defined)}
+integrity_requirement = { "IR:" ~ (low | medium | high | not_defined)}
+availability_requirement = { "AR:" ~ (low | medium | high | not_defined)}
+

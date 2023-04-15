@@ -1,20 +1,23 @@
 use crate::errors::CVSSError;
-use crate::CVSSv3Metric::*;
-use crate::*;
-use pest::Parser;
+use crate::v3::CVSSv3Metric::*;
+use crate::v3::*;
 use std::collections::HashSet;
 
+use pest::Parser;
+
 #[derive(Parser)]
-#[grammar = "cvss_v3.pest"]
-struct CVSSParser;
+#[grammar = "v3/cvss_v3.pest"]
+struct VectorParser;
 
 pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> {
-    let parse_tree = CVSSParser::parse(Rule::cvss_vector, s)
+    let parse_tree = VectorParser::parse(Rule::cvss_vector, s)
         .map_err(|_| CVSSError::ParsingError)?
         .next()
-        .unwrap();
+        .ok_or(CVSSError::ParsingError)?;
+
     let mut version: Option<Version> = None;
     let mut vector: HashSet<CVSSv3Metric> = HashSet::new();
+    let mut unmet_mandatory_requirements = 8;
 
     for entry in parse_tree.into_inner() {
         match entry.as_rule() {
@@ -27,6 +30,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                 }
             }
             Rule::attack_vector => {
+                unmet_mandatory_requirements -= 1;
                 match entry.into_inner().next().unwrap().as_rule() {
                     Rule::network => vector.insert(AttackVector(AV::N)),
                     Rule::adjacent => vector.insert(AttackVector(AV::A)),
@@ -38,6 +42,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                 .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::attack_complexity => {
+                unmet_mandatory_requirements -= 1;
                 match entry.into_inner().next().unwrap().as_rule() {
                     Rule::low => vector.insert(AttackComplexity(AC::L)),
                     Rule::high => vector.insert(AttackComplexity(AC::H)),
@@ -48,6 +53,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
             }
 
             Rule::privileges_required => {
+                unmet_mandatory_requirements -= 1;
                 match entry.into_inner().next().unwrap().as_rule() {
                     Rule::none => vector.insert(PrivilegesRequired(PR::N)),
                     Rule::low => vector.insert(PrivilegesRequired(PR::L)),
@@ -58,6 +64,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                 .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::user_interaction => {
+                unmet_mandatory_requirements -= 1;
                 match entry.into_inner().next().unwrap().as_rule() {
                     Rule::none => vector.insert(UserInteraction(UI::N)),
                     Rule::required => vector.insert(UserInteraction(UI::R)),
@@ -67,6 +74,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                 .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::scope => {
+                unmet_mandatory_requirements -= 1;
                 match entry.into_inner().next().unwrap().as_rule() {
                     Rule::unchanged => vector.insert(Scope(S::U)),
                     Rule::changed => vector.insert(Scope(S::C)),
@@ -76,6 +84,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                 .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::confidentiality => {
+                unmet_mandatory_requirements -= 1;
                 match entry.into_inner().next().unwrap().as_rule() {
                     Rule::high => vector.insert(Confidentiality(C::H)),
                     Rule::low => vector.insert(Confidentiality(C::L)),
@@ -86,6 +95,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                 .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::integrity => {
+                unmet_mandatory_requirements -= 1;
                 match entry.into_inner().next().unwrap().as_rule() {
                     Rule::high => vector.insert(Integrity(I::H)),
                     Rule::low => vector.insert(Integrity(I::L)),
@@ -96,6 +106,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
                 .ok_or(CVSSError::DuplicateMetrics)?;
             }
             Rule::availability => {
+                unmet_mandatory_requirements -= 1;
                 match entry.into_inner().next().unwrap().as_rule() {
                     Rule::high => vector.insert(Availability(A::H)),
                     Rule::low => vector.insert(Availability(A::L)),
@@ -264,7 +275,60 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
         }
     }
 
+    let version = version.ok_or(CVSSError::ParsingError)?;
     let mut vector = Vec::from_iter(vector);
     vector.sort();
-    Ok((version.ok_or(CVSSError::ParsingError)?, vector))
+    (unmet_mandatory_requirements == 0)
+        .then_some(Ok((version, vector)))
+        .ok_or(CVSSError::ParsingError)?
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_can_parse_base_metrics() {
+        let input = "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N";
+        let result = parse(input);
+        assert!(result.is_ok());
+        if let Ok((version, _vector)) = result {
+            matches!(version, Version::V31);
+        }
+    }
+
+    #[test]
+    fn test_can_parse_full_metrics() {
+        let input = "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N/E:F/RL:U/RC:C/CR:H/IR:H/AR:M/MAV:N/MAC:L/MPR:N/MUI:N/MS:U/MC:H/MI:H/MA:H";
+        let result = parse(input);
+        assert!(result.is_ok());
+        if let Ok((version, _vector)) = result {
+            matches!(version, Version::V31);
+        }
+    }
+
+    #[test]
+    fn test_wont_accept_invalid_input() {
+        let input = "CVSS:3.1/AV:NA:/R:/INS:/:/:H/A:E:F/RL:U/RC:C/MUI:N/MS:U/MC:H/MI:H/MA:H";
+        let result = parse(input);
+        assert!(result.is_err());
+        matches!(result, Err(CVSSError::ParsingError));
+    }
+
+    #[test]
+    fn test_can_detect_duplicate_metrics() {
+        let input = "CVSS:3.1/AV:N/AC:H/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N";
+        let result = parse(input);
+        assert!(result.is_err());
+        matches!(result, Err(CVSSError::DuplicateMetrics));
+    }
+
+    #[test]
+    fn test_can_detect_missing_mandatory_fields() {
+        let input = "CVSS:3.1/AV:N/AC:H/S:U/C:H/I:H/A:N";
+        let result = parse(input);
+        assert!(result.is_err());
+        matches!(result, Err(CVSSError::IncompleteBaseScore));
+    }
 }
