@@ -4,12 +4,14 @@ extern crate pest_derive;
 use crate::errors::CVSSError;
 use crate::normalize::round_to_1_decimal;
 use crate::v2::metrics::CVSSv2Metric;
+use crate::v2::severity::SeverityRating;
 use std::fmt;
 use std::ops::Deref;
 use std::str::FromStr;
 
 pub mod metrics;
 mod parser;
+mod severity;
 
 #[derive(Clone, Debug)]
 pub struct CVSSv2(pub Vec<metrics::CVSSv2Metric>);
@@ -123,6 +125,10 @@ impl CVSSv2 {
             Err(CVSSError::IncompleteEnvironmentalScore)
         }
     }
+
+    pub fn severity(&self) -> Result<SeverityRating, CVSSError> {
+        self.base_score()?.try_into()
+    }
 }
 
 #[cfg(test)]
@@ -157,5 +163,23 @@ mod tests {
         let (environmental_score, modified_impact) = vector.environmental_score().unwrap();
         assert!(environmental_score == expected_environmental);
         assert!(modified_impact == expected_modified_impact);
+    }
+
+    #[test]
+    fn test_severity_ratings() {
+        let valid_examples = vec![
+            ("AV:L/AC:H/Au:M/C:P/I:P/A:P", severity::SeverityRating::Low),
+            (
+                "AV:N/AC:L/Au:M/C:P/I:P/A:P",
+                severity::SeverityRating::Medium,
+            ),
+            ("AV:N/AC:L/Au:N/C:P/I:P/A:C", severity::SeverityRating::High),
+        ];
+
+        for (vector_text, expected) in &valid_examples {
+            let vector = CVSSv2::from_str(vector_text).unwrap();
+            let severity = vector.severity().unwrap();
+            assert!(*expected == severity);
+        }
     }
 }
