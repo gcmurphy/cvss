@@ -10,6 +10,7 @@ pub mod v3;
 use crate::severity::SeverityRating;
 use derive_more::Display;
 use std::str::FromStr;
+use std::iter::IntoIterator;
 
 #[derive(Clone, Display, Debug)]
 pub enum CVSS {
@@ -80,6 +81,25 @@ impl FromStr for CVSS {
                 Ok(v2) => Ok(CVSS::V2(v2)),
                 Err(e) => Err(e),
             },
+        }
+    }
+}
+
+#[derive(Clone, Debug, Display)]
+pub enum CVSSMetric {
+    V2(v2::metrics::CVSSv2Metric),
+    V3(v3::metrics::CVSSv3Metric),
+}
+
+impl IntoIterator for CVSS {
+
+    type Item = CVSSMetric;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        match self {
+            CVSS::V2(vector) => vector.iter().map(|metric| CVSSMetric::V2(metric.clone())).collect::<Vec<_>>().into_iter(),
+            CVSS::V3(vector) => vector.iter().map(|metric| CVSSMetric::V3(metric.clone())).collect::<Vec<_>>().into_iter(),
         }
     }
 }

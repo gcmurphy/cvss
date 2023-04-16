@@ -13,8 +13,5 @@ fn main() {
     );
     let severity_rating: SeverityRating = (&cvss).try_into().unwrap();
     println!("Severity Rating = {}", severity_rating);
-    match cvss {
-        CVSS::V2(vector) => vector.into_iter().for_each(|i| println!("{}", i)),
-        CVSS::V3(vector) => vector.into_iter().for_each(|i| println!("{}", i)),
-    };
+    cvss.into_iter().for_each(|i| println!("{}", i));
 }
