@@ -4,11 +4,9 @@ extern crate pest;
 use derive_more::Display;
 use std::fmt;
 use std::ops::Deref;
-use std::str::FromStr;
 
 pub mod metrics;
-mod parser;
-pub mod severity;
+pub(crate) mod parser;
 
 use crate::errors::CVSSError;
 use crate::normalize::roundup;
@@ -22,7 +20,7 @@ pub enum Version {
     V31,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Vector(Vec<CVSSv3Metric>);
 impl fmt::Display for Vector {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -32,7 +30,7 @@ impl fmt::Display for Vector {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CVSSv3(pub Version, pub Vector);
 impl fmt::Display for CVSSv3 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -56,17 +54,8 @@ impl Deref for CVSSv3 {
     }
 }
 
-impl FromStr for CVSSv3 {
-    type Err = CVSSError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (version, metrics) = parser::parse(s)?;
-        Ok(CVSSv3(version, Vector(metrics)))
-    }
-}
-
 impl CVSSv3 {
-    pub fn base_score(&self) -> Result<f64, CVSSError> {
+    pub(crate) fn base_score(&self) -> Result<f64, CVSSError> {
         use CVSSv3Metric::*;
         if let [av, ac, pr, ui, s, c, i, a, ..] = &self[..] {
             let iss: f64 = 1.0 - ((1.0 - c.value()) * (1.0 - i.value()) * (1.0 - a.value()));
@@ -102,7 +91,7 @@ impl CVSSv3 {
         }
     }
 
-    pub fn temporal_score(&self) -> Result<f64, CVSSError> {
+    pub(crate) fn temporal_score(&self) -> Result<f64, CVSSError> {
         let base_score = self.base_score()?;
         if let [e, rl, rc, ..] = &self[8..] {
             Ok(roundup(base_score * e.value() * rl.value() * rc.value()))
@@ -111,7 +100,7 @@ impl CVSSv3 {
         }
     }
 
-    pub fn environmental_score(&self) -> Result<f64, CVSSError> {
+    pub(crate) fn environmental_score(&self) -> Result<f64, CVSSError> {
         use CVSSv3Metric::*;
 
         if let [e, rl, rc, cr, ir, ar, mav, mac, mpr, mui, ms, mc, mi, ma] = &self[8..] {
@@ -162,9 +151,5 @@ impl CVSSv3 {
         } else {
             Err(CVSSError::IncompleteEnvironmentalScore)
         }
-    }
-
-    pub fn severity(&self) -> Result<severity::SeverityRating, CVSSError> {
-        self.base_score()?.try_into()
     }
 }

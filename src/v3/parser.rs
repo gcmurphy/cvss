@@ -9,7 +9,7 @@ use pest::Parser;
 #[grammar = "v3/cvss_v3.pest"]
 struct VectorParser;
 
-pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> {
+pub(crate) fn try_parse(s: &str) -> Result<CVSSv3, CVSSError> {
     let parse_tree = VectorParser::parse(Rule::cvss_vector, s)
         .map_err(|_| CVSSError::ParsingError)?
         .next()
@@ -279,7 +279,7 @@ pub(crate) fn parse(s: &str) -> Result<(Version, Vec<CVSSv3Metric>), CVSSError> 
     let mut vector = Vec::from_iter(vector);
     vector.sort();
     (unmet_mandatory_requirements == 0)
-        .then_some(Ok((version, vector)))
+        .then_some(Ok(CVSSv3(version, Vector(vector))))
         .ok_or(CVSSError::ParsingError)?
 }
 
@@ -291,27 +291,23 @@ mod tests {
     #[test]
     fn test_can_parse_base_metrics() {
         let input = "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N";
-        let result = parse(input);
+        let result = try_parse(input);
         assert!(result.is_ok());
-        if let Ok((version, _vector)) = result {
-            matches!(version, Version::V31);
-        }
+        matches!(result.unwrap(), CVSSv3(Version::V31, _));
     }
 
     #[test]
     fn test_can_parse_full_metrics() {
         let input = "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N/E:F/RL:U/RC:C/CR:H/IR:H/AR:M/MAV:N/MAC:L/MPR:N/MUI:N/MS:U/MC:H/MI:H/MA:H";
-        let result = parse(input);
+        let result = try_parse(input);
         assert!(result.is_ok());
-        if let Ok((version, _vector)) = result {
-            matches!(version, Version::V31);
-        }
+        matches!(result.unwrap(), CVSSv3(Version::V31, _));
     }
 
     #[test]
     fn test_wont_accept_invalid_input() {
         let input = "CVSS:3.1/AV:NA:/R:/INS:/:/:H/A:E:F/RL:U/RC:C/MUI:N/MS:U/MC:H/MI:H/MA:H";
-        let result = parse(input);
+        let result = try_parse(input);
         assert!(result.is_err());
         matches!(result, Err(CVSSError::ParsingError));
     }
@@ -319,7 +315,7 @@ mod tests {
     #[test]
     fn test_can_detect_duplicate_metrics() {
         let input = "CVSS:3.1/AV:N/AC:H/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N";
-        let result = parse(input);
+        let result = try_parse(input);
         assert!(result.is_err());
         matches!(result, Err(CVSSError::DuplicateMetrics));
     }
@@ -327,7 +323,7 @@ mod tests {
     #[test]
     fn test_can_detect_missing_mandatory_fields() {
         let input = "CVSS:3.1/AV:N/AC:H/S:U/C:H/I:H/A:N";
-        let result = parse(input);
+        let result = try_parse(input);
         assert!(result.is_err());
         matches!(result, Err(CVSSError::IncompleteBaseScore));
     }

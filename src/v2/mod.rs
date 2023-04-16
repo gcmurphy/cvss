@@ -4,14 +4,11 @@ extern crate pest_derive;
 use crate::errors::CVSSError;
 use crate::normalize::round_to_1_decimal;
 use crate::v2::metrics::CVSSv2Metric;
-use crate::v2::severity::SeverityRating;
 use std::fmt;
 use std::ops::Deref;
-use std::str::FromStr;
 
 pub mod metrics;
-mod parser;
-mod severity;
+pub(crate) mod parser;
 
 #[derive(Clone, Debug)]
 pub struct CVSSv2(pub Vec<metrics::CVSSv2Metric>);
@@ -28,15 +25,6 @@ impl Deref for CVSSv2 {
     type Target = [CVSSv2Metric];
     fn deref(&self) -> &[CVSSv2Metric] {
         &self.0[..]
-    }
-}
-
-impl FromStr for CVSSv2 {
-    type Err = CVSSError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let metrics = parser::parse(s)?;
-        Ok(CVSSv2(metrics))
     }
 }
 
@@ -84,10 +72,6 @@ impl CVSSv2 {
         }
     }
 
-    pub fn base_score(&self) -> Result<f64, CVSSError> {
-        self.calculate_base_score(None)
-    }
-
     fn calculate_temporal_score(&self, adjusted_impact: Option<f64>) -> Result<f64, CVSSError> {
         if let [exploitability, remediation_level, report_confidence, ..] = &self[6..] {
             let base_score = self.calculate_base_score(adjusted_impact)?;
@@ -109,38 +93,39 @@ impl CVSSv2 {
         }
     }
 
-    pub fn temporal_score(&self) -> Result<f64, CVSSError> {
+    pub(crate) fn base_score(&self) -> Result<f64, CVSSError> {
+        self.calculate_base_score(None)
+    }
+
+    pub(crate) fn temporal_score(&self) -> Result<f64, CVSSError> {
         self.calculate_temporal_score(None)
     }
 
-    pub fn environmental_score(&self) -> Result<(f64, f64), CVSSError> {
+    pub(crate) fn environmental_score(&self) -> Result<f64, CVSSError> {
         if let [cdp, td, ..] = &self[9..] {
-            let adjusted_impact = self.adjusted_impact()?;
             let adjusted_temporal = self.calculate_temporal_score(Some(self.adjusted_impact()?))?;
             let environmental_score = round_to_1_decimal(
                 (adjusted_temporal + (10.0 - adjusted_temporal) * cdp.value()) * td.value(),
             );
-            Ok((environmental_score, round_to_1_decimal(adjusted_impact)))
+            Ok(environmental_score)
         } else {
             Err(CVSSError::IncompleteEnvironmentalScore)
         }
-    }
-
-    pub fn severity(&self) -> Result<SeverityRating, CVSSError> {
-        self.base_score()?.try_into()
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use super::*;
+    use crate::severity::SeverityRating;
+    use crate::CVSS;
+    use std::str::FromStr;
 
     #[test]
     fn test_base_score_accuracy() {
         let input = "AV:L/AC:M/Au:S/C:P/I:C/A:N";
         let expected = 5.0;
-        let vector = CVSSv2::from_str(input).unwrap();
+        let vector = CVSS::from_str(input).unwrap();
         let base_score = vector.base_score().unwrap();
         assert!(base_score == expected);
     }
@@ -149,7 +134,7 @@ mod tests {
     fn test_temporal_score_accuracy() {
         let input = "AV:L/AC:M/Au:S/C:P/I:C/A:N/E:POC/RL:W/RC:C";
         let expected = 4.3;
-        let vector = CVSSv2::from_str(input).unwrap();
+        let vector = CVSS::from_str(input).unwrap();
         let temporal_score = vector.temporal_score().unwrap();
         assert!(temporal_score == expected);
     }
@@ -158,27 +143,22 @@ mod tests {
     fn test_environmental_score_accuracy() {
         let input = "AV:L/AC:M/Au:S/C:P/I:C/A:N/E:POC/RL:W/RC:C/CDP:H/TD:M/CR:H/IR:M/AR:M";
         let expected_environmental = 5.5;
-        let expected_modified_impact = 8.3;
-        let vector = CVSSv2::from_str(input).unwrap();
-        let (environmental_score, modified_impact) = vector.environmental_score().unwrap();
+        let vector = CVSS::from_str(input).unwrap();
+        let environmental_score = vector.environmental_score().unwrap();
         assert!(environmental_score == expected_environmental);
-        assert!(modified_impact == expected_modified_impact);
     }
 
     #[test]
     fn test_severity_ratings() {
         let valid_examples = vec![
-            ("AV:L/AC:H/Au:M/C:P/I:P/A:P", severity::SeverityRating::Low),
-            (
-                "AV:N/AC:L/Au:M/C:P/I:P/A:P",
-                severity::SeverityRating::Medium,
-            ),
-            ("AV:N/AC:L/Au:N/C:P/I:P/A:C", severity::SeverityRating::High),
+            ("AV:L/AC:H/Au:M/C:P/I:P/A:P", SeverityRating::Low),
+            ("AV:N/AC:L/Au:M/C:P/I:P/A:P", SeverityRating::Medium),
+            ("AV:N/AC:L/Au:N/C:P/I:P/A:C", SeverityRating::High),
         ];
 
         for (vector_text, expected) in &valid_examples {
-            let vector = CVSSv2::from_str(vector_text).unwrap();
-            let severity = vector.severity().unwrap();
+            let vector = CVSS::from_str(vector_text).unwrap();
+            let severity = (&vector).try_into().unwrap();
             assert!(*expected == severity);
         }
     }

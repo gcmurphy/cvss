@@ -1,6 +1,7 @@
 use crate::errors::CVSSError;
 use crate::v2::metrics::CVSSv2Metric::*;
 use crate::v2::metrics::*;
+use crate::v2::CVSSv2;
 
 use std::collections::HashSet;
 
@@ -10,7 +11,7 @@ use pest::Parser;
 #[grammar = "v2/cvss_v2.pest"]
 struct VectorParser;
 
-pub(crate) fn parse(s: &str) -> Result<Vec<CVSSv2Metric>, CVSSError> {
+pub(crate) fn try_parse(s: &str) -> Result<CVSSv2, CVSSError> {
     let parse_tree = VectorParser::parse(Rule::cvss_vector, s)
         .map_err(|_| CVSSError::ParsingError)?
         .next()
@@ -143,7 +144,7 @@ pub(crate) fn parse(s: &str) -> Result<Vec<CVSSv2Metric>, CVSSError> {
     let mut vector = Vec::from_iter(vector);
     vector.sort();
     (unmet_mandatory_requirements == 0)
-        .then_some(Ok(vector))
+        .then_some(Ok(CVSSv2(vector)))
         .ok_or(CVSSError::ParsingError)?
 }
 
@@ -154,7 +155,7 @@ mod tests {
 
     #[test]
     fn test_can_parse_cvss_v2_base() {
-        let result = parse("AV:L/AC:H/Au:N/C:C/I:C/A:C");
+        let result = try_parse("AV:L/AC:H/Au:N/C:C/I:C/A:C");
         assert!(result.is_ok());
         if let Ok(vector) = result {
             assert!(vector[0] == AccessVector(AV::L));
@@ -169,7 +170,7 @@ mod tests {
     #[test]
     fn test_can_parse_cvss_v2_full() {
         let input = "AV:A/AC:M/Au:S/C:P/I:C/A:P/E:POC/RL:W/RC:UR/CDP:MH/TD:M/CR:M/IR:M/AR:M";
-        let result = parse(input);
+        let result = try_parse(input);
         assert!(result.is_ok());
         if let Ok(vector) = result {
             assert!(vector[0] == AccessVector(AV::L));
@@ -192,20 +193,20 @@ mod tests {
     #[test]
     fn test_wont_accept_invalid_input() {
         let input = "AV:AA/E:POR:WR:RCP:HT:M/CR:/IR:M/AR:M";
-        let result = parse(input);
+        let result = try_parse(input);
         matches!(result, Err(CVSSError::ParsingError));
     }
 
     #[test]
     fn test_wont_allow_repeat_metrics() {
         let input = "AV:L/AC:H/Au:N/Au:N/C:C/I:C/A:C";
-        let result = parse(input);
+        let result = try_parse(input);
         matches!(result, Err(CVSSError::DuplicateMetrics));
     }
 
     #[test]
     fn test_can_detect_missing_mandatory_fields() {
-        let result = parse("AV:L/AC:H/C:C/I:C/A:C");
+        let result = try_parse("AV:L/AC:H/C:C/I:C/A:C");
         assert!(result.is_err());
         matches!(result, Err(CVSSError::ParsingError));
     }
